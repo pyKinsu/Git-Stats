@@ -1,25 +1,39 @@
 import { useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Search } from 'lucide-react';
 
-export default function GitHubForm({ onSubmit }) {
-  const [username, setUsername] = useState('');
+export default function GitHubForm({ onSubmit, label }) {
+  const [input, setInput] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(username);
+    const trimmed = input.trim();
+    if (trimmed) onSubmit(trimmed);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-3 justify-center p-6">
-      <input
-        className="px-4 py-2 w-64 rounded-xl bg-white text-black shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-400"
-        placeholder="Enter GitHub username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-5 py-2 rounded-xl font-semibold shadow-md hover:scale-105 transition-transform flex items-center gap-2">
-        <Sparkles className="w-4 h-4" /> Load Stats
-      </button>
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mb-6"
+    >
+      <label htmlFor="github-username" className="sr-only">
+        {label}
+      </label>
+      <div className="flex items-center w-full sm:max-w-md border border-input rounded-lg overflow-hidden bg-card shadow">
+        <input
+          id="github-username"
+          type="text"
+          placeholder={label}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className="flex-1 px-4 py-2 bg-transparent text-foreground placeholder-muted-foreground outline-none"
+        />
+        <button
+          type="submit"
+          className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition"
+        >
+          <Search className="w-4 h-4" />
+        </button>
+      </div>
     </form>
   );
 }
