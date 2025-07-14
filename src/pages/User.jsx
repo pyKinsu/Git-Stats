@@ -18,24 +18,29 @@ export default function UserPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [user, repos] = await Promise.all([
-        fetchUserProfile(username),
-        fetchUserRepos(username)
-      ]);
-      setProfile(user);
-      setRepos(repos);
-      setFilteredRepos(repos);
+      try {
+        const [userData, repoData] = await Promise.all([
+          fetchUserProfile(username),
+          fetchUserRepos(username)
+        ]);
+        setProfile(userData);
+        setRepos(repoData);
+        setFilteredRepos(repoData);
+      } catch (err) {
+        console.error('Error fetching GitHub data:', err);
+      }
     };
+
     fetchData();
   }, [username]);
 
   return (
-    <main className="flex-1 p-4">
+    <div>
       {profile && <UserCard profile={profile} />}
       <ContributionCalendar username={username} />
       <RepoSortFilter repos={repos} onChange={setFilteredRepos} />
       <Charts repos={filteredRepos} />
       <StatGalaxy repos={filteredRepos} />
-    </main>
+    </div>
   );
 }
