@@ -1,21 +1,13 @@
+import { Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import Sidebar from './components/layout/Sidebar';
-import GitHubForm from './components/GitHubForm';
-import StatGalaxy from './components/StatGalaxy';
-import UserCard from './components/UserCard';
-import Charts from './components/Charts';
-import ContributionCalendar from './components/ContributionCalendar';
-import RepoSortFilter from './components/RepoSortFilter';
-import { fetchUserRepos, fetchUserProfile } from './services/github';
+import Home from './pages/Home';
+import UserPage from './pages/User';
 import translations from './lib/i18n';
 
 function App() {
-  const [repos, setRepos] = useState([]);
-  const [filteredRepos, setFilteredRepos] = useState([]);
-  const [profile, setProfile] = useState(null);
-  const [username, setUsername] = useState('');
   const [locale, setLocale] = useState('en');
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
@@ -26,40 +18,16 @@ function App() {
 
   const t = translations[locale];
 
-  const handleSubmit = async (inputUsername) => {
-    try {
-      const [repoData, profileData] = await Promise.all([
-        fetchUserRepos(inputUsername),
-        fetchUserProfile(inputUsername),
-      ]);
-      setRepos(repoData);
-      setFilteredRepos(repoData);
-      setProfile(profileData);
-      setUsername(inputUsername);
-    } catch (error) {
-      alert('User not found or API error');
-    }
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-sans">
-      <Header theme={theme} setTheme={setTheme} />
+      <Header theme={theme} setTheme={setTheme} locale={locale} setLocale={setLocale} />
       <div className="flex flex-1">
         <Sidebar locale={locale} setLocale={setLocale} />
         <main className="flex-1 p-4">
-          <GitHubForm onSubmit={handleSubmit} label={t.inputLabel} />
-          {profile && <UserCard profile={profile} />}
-          {username && <ContributionCalendar username={username} />}
-          {filteredRepos.length > 0 && (
-            <>
-              <RepoSortFilter repos={repos} onChange={setFilteredRepos} />
-              <Charts repos={filteredRepos} />
-              <StatGalaxy repos={filteredRepos} />
-            </>
-          )}
-          {!profile && (
-            <p className="text-muted-foreground text-center mt-8">{t.prompt}</p>
-          )}
+          <Routes>
+            <Route path="/" element={<Home locale={locale} />} />
+            <Route path="/user/:username" element={<UserPage locale={locale} />} />
+          </Routes>
         </main>
       </div>
       <Footer />
