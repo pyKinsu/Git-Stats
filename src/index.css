@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #0f2027;
+  background-image: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+  color: white;
+}
