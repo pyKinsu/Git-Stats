@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
 
 export default function GitHubForm({ onSubmit }) {
   const [username, setUsername] = useState('');
@@ -9,14 +10,16 @@ export default function GitHubForm({ onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 justify-center p-4">
+    <form onSubmit={handleSubmit} className="flex gap-3 justify-center p-6">
       <input
-        className="px-4 py-2 border rounded-xl text-black"
+        className="px-4 py-2 w-64 rounded-xl bg-white text-black shadow-lg focus:outline-none focus:ring-2 focus:ring-cyan-400"
         placeholder="Enter GitHub username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
-      <button className="bg-blue-600 text-white px-4 py-2 rounded-xl">Load Stats</button>
+      <button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-5 py-2 rounded-xl font-semibold shadow-md hover:scale-105 transition-transform flex items-center gap-2">
+        <Sparkles className="w-4 h-4" /> Load Stats
+      </button>
     </form>
   );
 }
