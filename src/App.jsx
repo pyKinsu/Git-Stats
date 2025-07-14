@@ -7,11 +7,13 @@ import StatGalaxy from './components/StatGalaxy';
 import UserCard from './components/UserCard';
 import Charts from './components/Charts';
 import ContributionCalendar from './components/ContributionCalendar';
+import RepoSortFilter from './components/RepoSortFilter';
 import { fetchUserRepos, fetchUserProfile } from './services/github';
 import translations from './lib/i18n';
 
 function App() {
   const [repos, setRepos] = useState([]);
+  const [filteredRepos, setFilteredRepos] = useState([]);
   const [profile, setProfile] = useState(null);
   const [username, setUsername] = useState('');
   const [locale, setLocale] = useState('en');
@@ -31,6 +33,7 @@ function App() {
         fetchUserProfile(inputUsername),
       ]);
       setRepos(repoData);
+      setFilteredRepos(repoData);
       setProfile(profileData);
       setUsername(inputUsername);
     } catch (error) {
@@ -47,10 +50,11 @@ function App() {
           <GitHubForm onSubmit={handleSubmit} label={t.inputLabel} />
           {profile && <UserCard profile={profile} />}
           {username && <ContributionCalendar username={username} />}
-          {repos.length > 0 && (
+          {filteredRepos.length > 0 && (
             <>
-              <Charts repos={repos} />
-              <StatGalaxy repos={repos} />
+              <RepoSortFilter repos={repos} onChange={setFilteredRepos} />
+              <Charts repos={filteredRepos} />
+              <StatGalaxy repos={filteredRepos} />
             </>
           )}
           {!profile && (
