@@ -1,35 +1,64 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import Sidebar from './components/layout/Sidebar';
 import GitHubForm from './components/GitHubForm';
 import StatGalaxy from './components/StatGalaxy';
-import { fetchUserRepos } from './services/github';
+import UserCard from './components/UserCard';
+import Charts from './components/Charts';
+import ContributionCalendar from './components/ContributionCalendar';
+import { fetchUserRepos, fetchUserProfile } from './services/github';
+import translations from './lib/i18n';
 
 function App() {
   const [repos, setRepos] = useState([]);
+  const [profile, setProfile] = useState(null);
+  const [username, setUsername] = useState('');
+  const [locale, setLocale] = useState('en');
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
-  const handleSubmit = async (username) => {
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const t = translations[locale];
+
+  const handleSubmit = async (inputUsername) => {
     try {
-      const repoData = await fetchUserRepos(username);
+      const [repoData, profileData] = await Promise.all([
+        fetchUserRepos(inputUsername),
+        fetchUserProfile(inputUsername),
+      ]);
       setRepos(repoData);
+      setProfile(profileData);
+      setUsername(inputUsername);
     } catch (error) {
-      alert("User not found or API error");
+      alert('User not found or API error');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] text-white font-sans">
-      <header className="bg-black bg-opacity-30 backdrop-blur-md shadow-lg p-6 text-center border-b border-white/10 sticky top-0 z-10">
-        <h1 className="text-5xl font-extrabold tracking-wide text-cyan-300 drop-shadow-md animate-pulse">GitHub Galaxy 3D 🌌</h1>
-        <p className="text-lg mt-2 text-white/80">Visualize your GitHub universe like never before</p>
-      </header>
-      <GitHubForm onSubmit={handleSubmit} />
-      {repos.length > 0 ? (
-        <>
-          <h2 className="text-center text-2xl font-semibold mb-4 animate-fade-in">🔭 Repos Visualized Below</h2>
-          <StatGalaxy repos={repos} />
-        </>
-      ) : (
-        <p className="text-center text-sm text-white/70 mt-8 animate-fade-in">Enter your GitHub username to see magic 🌠</p>
-      )}
+    <div className="flex flex-col min-h-screen bg-background text-foreground font-sans">
+      <Header theme={theme} setTheme={setTheme} />
+      <div className="flex flex-1">
+        <Sidebar locale={locale} setLocale={setLocale} />
+        <main className="flex-1 p-4">
+          <GitHubForm onSubmit={handleSubmit} label={t.inputLabel} />
+          {profile && <UserCard profile={profile} />}
+          {username && <ContributionCalendar username={username} />}
+          {repos.length > 0 && (
+            <>
+              <Charts repos={repos} />
+              <StatGalaxy repos={repos} />
+            </>
+          )}
+          {!profile && (
+            <p className="text-muted-foreground text-center mt-8">{t.prompt}</p>
+          )}
+        </main>
+      </div>
+      <Footer />
     </div>
   );
 }
