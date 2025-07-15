@@ -1,25 +1,34 @@
 <?php
-header('Content-Type: application/json');
+// Enable CORS if needed
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json");
 
-if (!isset($_GET['username'])) {
-  echo json_encode(['error' => 'Username required']);
-  exit;
+// Get the username from the query string
+$username = $_GET['username'] ?? null;
+
+if (!$username) {
+    echo json_encode(["error" => "Username is required"]);
+    exit;
 }
 
-$username = htmlspecialchars($_GET['username']);
-$url = "https://api.github.com/users/$username";
+// GitHub API URL
+$url = "https://api.github.com/users/" . urlencode($username);
 
-// Set User-Agent or GitHub API will block it
-$options = [
-  'http' => [
-    'header' => "User-Agent: PHP\r\n"
-  ]
-];
-$context = stream_context_create($options);
-$response = @file_get_contents($url, false, $context);
+// Setup curl
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+// GitHub API requires a User-Agent header
+curl_setopt($ch, CURLOPT_USERAGENT, "GitHubStatsViewer");
 
-if ($response === false) {
-  echo json_encode(['error' => 'User not found']);
+$response = curl_exec($ch);
+$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+// Return result
+if ($httpcode == 200) {
+    echo $response;
 } else {
-  echo $response;
+    echo json_encode(["error" => "GitHub API error", "status" => $httpcode]);
 }
+?>
