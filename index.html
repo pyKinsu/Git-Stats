@@ -3,31 +3,143 @@
 <head>
   <meta charset="UTF-8" />
   <title>GitHub Galaxy Stats</title>
-  <link rel="stylesheet" href="assets/style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg: #f9fafb;
+      --text: #111;
+      --card-bg: #fff;
+      --accent: #3b82f6;
+    }
+
+    body.dark {
+      --bg: #0d1117;
+      --text: #e6edf3;
+      --card-bg: #161b22;
+      --accent: #60a5fa;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: var(--card-bg);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--accent);
+    }
+
+    form {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"] {
+      padding: 0.5rem;
+      width: 60%;
+      border: 1px solid #ccc;
+      border-radius: 4px 0 0 4px;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+    }
+
+    .toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--accent);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .result {
+      text-align: center;
+    }
+
+    canvas {
+      margin-top: 2rem;
+    }
+  </style>
 </head>
 <body>
+
+  <button class="toggle" onclick="toggleDark()">☀️ / 🌙</button>
+
   <div class="container">
     <h1>GitHub Galaxy Stats</h1>
+
     <form id="githubForm">
       <input type="text" id="username" placeholder="Enter GitHub Username" required />
-      <button type="submit">View Stats</button>
+      <button type="submit">Get Stats</button>
     </form>
-    <div id="result"></div>
+
+    <div class="result" id="result"></div>
+    <canvas id="repoChart" width="400" height="200" style="display:none;"></canvas>
   </div>
 
   <script>
+    function toggleDark() {
+      document.body.classList.toggle('dark');
+    }
+
     document.getElementById('githubForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       const username = document.getElementById('username').value;
-      const response = await fetch(`api/github.php?username=${username}`);
-      const data = await response.json();
+      const res = await fetch(`api/github.php?username=${username}`);
+      const data = await res.json();
+
+      if (data.message === 'Not Found' || data.error) {
+        document.getElementById('result').innerHTML = `<p>User not found or API error.</p>`;
+        return;
+      }
 
       document.getElementById('result').innerHTML = `
-        <h2>${data.name}</h2>
+        <h2>${data.name || data.login}</h2>
         <p>Repos: ${data.public_repos}</p>
         <p>Followers: ${data.followers}</p>
         <p>Following: ${data.following}</p>
       `;
+
+      // Create chart
+      document.getElementById('repoChart').style.display = 'block';
+      const ctx = document.getElementById('repoChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Repos', 'Followers', 'Following'],
+          datasets: [{
+            data: [data.public_repos, data.followers, data.following],
+            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
+          }]
+        }
+      });
     });
   </script>
 </body>
