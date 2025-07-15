@@ -2,145 +2,131 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GitHub Galaxy Stats</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GitHub Stats Galaxy | pykinsu</title>
   <style>
-    :root {
-      --bg: #f9fafb;
-      --text: #111;
-      --card-bg: #fff;
-      --accent: #3b82f6;
-    }
-
-    body.dark {
-      --bg: #0d1117;
-      --text: #e6edf3;
-      --card-bg: #161b22;
-      --accent: #60a5fa;
-    }
-
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: sans-serif;
       margin: 0;
       padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0e0e0e;
+      color: #fff;
+      height: 100vh;
+      overflow-x: hidden;
     }
-
-    .container {
-      max-width: 720px;
-      margin: 2rem auto;
-      padding: 1rem;
-      background: var(--card-bg);
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    header, footer {
+      padding: 1rem 2rem;
+      background-color: #1e1e1e;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-
-    h1 {
-      text-align: center;
-      color: var(--accent);
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      height: 100%;
+      width: 250px;
+      background: #1a1a1a;
+      padding: 2rem 1rem;
+      transition: left 0.3s ease;
+      z-index: 999;
     }
-
-    form {
+    .sidebar.open { left: 0; }
+    .toggle-btn {
+      font-size: 1.5rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: white;
+    }
+    .sidebar-footer {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+    }
+    .search-box {
       display: flex;
       justify-content: center;
-      margin-bottom: 1rem;
+      align-items: center;
+      margin: 4rem auto;
     }
-
-    input[type="text"] {
-      padding: 0.5rem;
-      width: 60%;
-      border: 1px solid #ccc;
-      border-radius: 4px 0 0 4px;
-    }
-
-    button {
-      padding: 0.5rem 1rem;
-      background: var(--accent);
-      color: white;
+    .search-input {
+      width: 400px;
+      height: 50px;
+      border-radius: 25px 0 0 25px;
       border: none;
-      border-radius: 0 4px 4px 0;
+      padding-left: 20px;
+      font-size: 1.2rem;
+    }
+    .search-btn {
+      width: 100px;
+      height: 50px;
+      border-radius: 0 25px 25px 0;
+      border: none;
+      background: greenyellow;
+      font-size: 1.3rem;
+      font-weight: bold;
       cursor: pointer;
     }
-
-    .toggle {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      background: var(--accent);
-      color: white;
-      padding: 0.3rem 0.8rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+    .cards-container {
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
     }
-
-    .result {
-      text-align: center;
+    .card {
+      background: #181818;
+      padding: 1.5rem;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.1);
+      transition: transform 0.3s ease;
     }
-
-    canvas {
-      margin-top: 2rem;
+    .card:hover {
+      transform: translateY(-10px) rotateX(3deg);
     }
   </style>
 </head>
 <body>
 
-  <button class="toggle" onclick="toggleDark()">☀️ / 🌙</button>
-
-  <div class="container">
+  <header>
+    <button id="menuBtn" class="toggle-btn">&#9776;</button>
     <h1>GitHub Galaxy Stats</h1>
+    <button id="toggleTheme" class="toggle-btn">🌙</button>
+  </header>
 
-    <form id="githubForm">
-      <input type="text" id="username" placeholder="Enter GitHub Username" required />
-      <button type="submit">Get Stats</button>
-    </form>
+  <aside class="sidebar" id="sidebar">
+    <h3>Menu</h3>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="#">Explore</a></li>
+      <li><a href="#">API</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <label>🌐 Language</label>
+      <select id="langSelect">
+        <option value="en">EN</option>
+        <option value="hi">हिंदी</option>
+      </select>
+    </div>
+  </aside>
 
-    <div class="result" id="result"></div>
-    <canvas id="repoChart" width="400" height="200" style="display:none;"></canvas>
-  </div>
+  <main>
+    <div class="search-box">
+      <input type="text" id="usernameInput" class="search-input" placeholder="Enter GitHub username..." />
+      <button class="search-btn" id="searchBtn">➤</button>
+    </div>
 
-  <script>
-    function toggleDark() {
-      document.body.classList.toggle('dark');
-    }
+    <div id="results" class="cards-container">
+      <!-- Dynamic cards will be inserted here -->
+    </div>
+  </main>
 
-    document.getElementById('githubForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const username = document.getElementById('username').value;
-      const res = await fetch(`api/github.php?username=${username}`);
-      const data = await res.json();
+  <footer>
+    <p>© 2025 by pykinsu | GitHub Galaxy Stats</p>
+  </footer>
 
-      if (data.message === 'Not Found' || data.error) {
-        document.getElementById('result').innerHTML = `<p>User not found or API error.</p>`;
-        return;
-      }
+  <script src="main.js"></script>
 
-      document.getElementById('result').innerHTML = `
-        <h2>${data.name || data.login}</h2>
-        <p>Repos: ${data.public_repos}</p>
-        <p>Followers: ${data.followers}</p>
-        <p>Following: ${data.following}</p>
-      `;
-
-      // Create chart
-      document.getElementById('repoChart').style.display = 'block';
-      const ctx = document.getElementById('repoChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Repos', 'Followers', 'Following'],
-          datasets: [{
-            data: [data.public_repos, data.followers, data.following],
-            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
-          }]
-        }
-      });
-    });
-  </script>
 </body>
 </html>
