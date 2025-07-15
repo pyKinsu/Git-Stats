@@ -1,132 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GitHub Stats Galaxy | pykinsu</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #0e0e0e;
-      color: #fff;
-      height: 100vh;
-      overflow-x: hidden;
-    }
-    header, footer {
-      padding: 1rem 2rem;
-      background-color: #1e1e1e;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: -250px;
-      height: 100%;
-      width: 250px;
-      background: #1a1a1a;
-      padding: 2rem 1rem;
-      transition: left 0.3s ease;
-      z-index: 999;
-    }
-    .sidebar.open { left: 0; }
-    .toggle-btn {
-      font-size: 1.5rem;
-      cursor: pointer;
-      background: none;
-      border: none;
-      color: white;
-    }
-    .sidebar-footer {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-    }
-    .search-box {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 4rem auto;
-    }
-    .search-input {
-      width: 400px;
-      height: 50px;
-      border-radius: 25px 0 0 25px;
-      border: none;
-      padding-left: 20px;
-      font-size: 1.2rem;
-    }
-    .search-btn {
-      width: 100px;
-      height: 50px;
-      border-radius: 0 25px 25px 0;
-      border: none;
-      background: greenyellow;
-      font-size: 1.3rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .cards-container {
-      padding: 2rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
-    }
-    .card {
-      background: #181818;
-      padding: 1.5rem;
-      border-radius: 20px;
-      box-shadow: 0 0 20px rgba(0,255,255,0.1);
-      transition: transform 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-10px) rotateX(3deg);
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Galaxy Stats</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body class="light-mode">
 
-  <header>
-    <button id="menuBtn" class="toggle-btn">&#9776;</button>
-    <h1>GitHub Galaxy Stats</h1>
-    <button id="toggleTheme" class="toggle-btn">🌙</button>
-  </header>
-
-  <aside class="sidebar" id="sidebar">
-    <h3>Menu</h3>
-    <ul>
-      <li><a href="/">Home</a></li>
-      <li><a href="#">Explore</a></li>
-      <li><a href="#">API</a></li>
-    </ul>
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar">
+    <div class="close-btn" onclick="toggleSidebar()">&times;</div>
     <div class="sidebar-footer">
-      <label>🌐 Language</label>
-      <select id="langSelect">
-        <option value="en">EN</option>
-        <option value="hi">हिंदी</option>
+      <select id="languageSwitcher" onchange="switchLanguage()">
+        <option value="en">English</option>
+        <option value="hi">Hindi</option>
+        <option value="fr">Français</option>
       </select>
+      <button onclick="toggleTheme()">🌓</button>
     </div>
   </aside>
 
-  <main>
-    <div class="search-box">
-      <input type="text" id="usernameInput" class="search-input" placeholder="Enter GitHub username..." />
-      <button class="search-btn" id="searchBtn">➤</button>
-    </div>
+  <!-- Header -->
+  <header>
+    <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+    <h1>GitHub Galaxy Stats</h1>
+  </header>
 
-    <div id="results" class="cards-container">
-      <!-- Dynamic cards will be inserted here -->
-    </div>
-  </main>
+  <!-- Search Bar -->
+  <div class="contenir">
+    <input type="text" class="search" id="search-inp" placeholder="Search GitHub Username...">
+    <button class="search-btn" id="search-inp-btn">➤</button>
+  </div>
 
-  <footer>
-    <p>© 2025 by pykinsu | GitHub Galaxy Stats</p>
-  </footer>
+  <!-- Cards Section -->
+  <section id="cards-container" class="cards-grid">
+    <!-- Cards will be injected by JavaScript -->
+  </section>
+
+  <!-- Chart Container -->
+  <canvas id="statsChart"></canvas>
 
   <script src="main.js"></script>
-
 </body>
 </html>
